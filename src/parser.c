@@ -113,6 +113,24 @@ static int _isTerminator(char ch) {
 	return (ch == '|' || ch == '&' || ch == ';');
 }
 
+static void _setRedirectionBasedOnType(command_t *command, int redirectionType, char *ptr, size_t n) {
+	char *str;
+	size_t size = (n + 1) * sizeof(*str);
+	str = malloc(size);
+	if(str == NULL) {
+		return;
+	}
+	memset(str, 0, size);
+	str = strncpy(str, ptr, n);
+	*(str + size) = '\0';
+	if(redirectionType == kRedirectionTypeOut) {
+		commandSetRedirectToPath(command, str);
+	} else if(redirectionType == kRedirectionTypeIn) {
+		commandSetRedirectFromPath(command, str);
+	}
+	FREE(str);
+}
+
 queue_t *commandQueueFromInput(char *inputLine) {
 	queue_t *commandQueue = queueNew();
 	command_t *command = NULL;
@@ -123,6 +141,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 	char *dataStart = inputLine;
 	char *dataEnd = NULL;
 	int isFinishedParsing = 0;
+	int redirectionType = kRedirectionTypeNone;
 	
 	/* TODO: Use these :) /
 	int isInSingleQuote = 0;
@@ -178,12 +197,42 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				break;
 			case kMachineStateParsingToken:
 				/* TODO: Not implemented. */
-				inputPtr++;
 				currentState = kMachineStateDefault;
+			case kMachineStateEnteringRedirection:
+				if(redirectionType == kRedirectionTypeNone) {
+					if(*inputPtr == '<') {
+						redirectionType = kRedirectionTypeIn;
+						currentState = kMachineStateParsingRedirection;
+					}	else if(*inputPtr == '>') {
+						redirectionType = kRedirectionTypeOut;
+						currentState = kMachineStateParsingRedirection;
+					}
+				}
+				inputPtr++;
 				break;
 			case kMachineStateParsingRedirection:
-				/* TODO: Not implemented. */
-				inputPtr++;
+				if(dataStart == NULL) {
+					if(isspace(*inputPtr)) {
+						inputPtr++;
+					}	else if(*inputPtr == '\0' || _isTerminator(*inputPtr)) {
+						fprintf(stderr, "mush: parse error near '%c'\n", *inputPtr);
+						return NULL;
+					} else {
+						dataStart = inputPtr;
+						inputPtr++;
+					}
+				} else if(isspace(*inputPtr) || _isTerminator(*inputPtr) || *inputPtr == '\0' || *inputPtr == '<' || *inputPtr == '>') {
+					currentState = kMachineStateLeavingRedirection;
+				} else {
+					inputPtr++;
+				}
+				break;
+			case kMachineStateLeavingRedirection:
+				dataEnd = inputPtr;
+				_setRedirectionBasedOnType(command, redirectionType, dataStart, dataEnd - dataStart);
+				dataStart = NULL;
+				dataEnd = NULL;
+				redirectionType = kRedirectionTypeNone;
 				currentState = kMachineStateDefault;
 				break;
 			case kMachineStateTerminal:
