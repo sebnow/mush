@@ -131,8 +131,48 @@ static void _setRedirectionBasedOnType(command_t *command, int redirectionType, 
 	FREE(str);
 }
 
+
+static void _addTokensToCommand(queue_t *tokens, command_t *command)
+{
+	char *token;
+	char **argv = NULL;
+	size_t count = queueCount(tokens) + 1;
+	if(count == 0) {
+		return;
+	}
+	argv = malloc((count + 1) * sizeof(*argv));
+	if(argv == NULL) {
+		return;
+	}
+	command->argc = count;
+	command->argv = argv;
+	/* The first element should point to the program filename */
+	*argv = command->path;
+	argv++;
+	while(queueRemove(tokens, (void *)&token)) {
+		*argv = token;
+		argv++;
+	}
+	/* execvp requires a NULL terminated array */
+	*argv = NULL;
+}
+
+static void _addTokenToQueue(queue_t *queue, char *token, size_t n) {
+	char *str;
+	size_t size = (n + 1) * sizeof(*str);
+	str = malloc(size);
+	if(str == NULL) {
+		return;
+	}
+	memset(str, 0, size);
+	str = strncpy(str, token, n);
+	*(str + size) = '\0';
+	queueInsert(queue, str);
+}
+
 queue_t *commandQueueFromInput(char *inputLine) {
 	queue_t *commandQueue = queueNew();
+	queue_t *tokens = queueNew();
 	command_t *command = NULL;
 	char *inputPtr = inputLine;
 	
@@ -190,14 +230,35 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				break;
 			case kMachineStateParsingCommandTerminator:
 				_setConnectionMaskBasedOnCharacter(command, *inputPtr);
+				_addTokensToCommand(tokens, command);
 				queueInsert(commandQueue, command);
 				command = NULL;
 				currentState = kMachineStateInitial;
 				inputPtr++;
 				break;
+			case kMachineStateEnteringToken:
+				ASSERT(tokens != NULL, "token queue not initialized\n");
+				if(isspace(*inputPtr)) {
+					inputPtr++;
+				} else {
+					dataStart = inputPtr;
+					currentState = kMachineStateParsingToken;
+				}
+				break;
 			case kMachineStateParsingToken:
-				/* TODO: Not implemented. */
+				if(*inputPtr == ' ' || *inputPtr == '\0' || _isTerminator(*inputPtr)) {
+					currentState = kMachineStateLeavingToken;
+				} else {
+					inputPtr++;
+				}
+				break;
+			case kMachineStateLeavingToken:
+				dataEnd = inputPtr;
+				_addTokenToQueue(tokens, dataStart, dataEnd - dataStart);
+				dataStart = NULL;
+				dataEnd = NULL;
 				currentState = kMachineStateDefault;
+				break;
 			case kMachineStateEnteringRedirection:
 				if(redirectionType == kRedirectionTypeNone) {
 					if(*inputPtr == '<') {
@@ -237,6 +298,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				break;
 			case kMachineStateTerminal:
 				isFinishedParsing = 1;
+				_addTokensToCommand(tokens, command);
 				queueInsert(commandQueue, command);
 				command = NULL;
 				break;
@@ -251,12 +313,14 @@ queue_t *commandQueueFromInput(char *inputLine) {
 					currentState = kMachineStateTerminal;
 				} else if(isspace(*inputPtr)) {
 					inputPtr++;
-				} else {
-					/* TODO: token support (if command->path != NULL)*/
+				} else if(command->path == NULL) {
 					currentState = kMachineStateEnteringPath;
+				} else {
+					currentState = kMachineStateEnteringToken;
 				}
 				break;
 		}
 	}
+
 	return commandQueue;
 }
