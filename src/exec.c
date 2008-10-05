@@ -23,8 +23,26 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "command.h"
 #include "util.h"
+#include "builtin.h"
+
+static void _executeBuiltinCommand(command_t *command)
+{
+	commandBuiltinFunction builtinFunc;
+	/* TODO: Ideally this should be in a hash table so it is easier to look up
+	 the command and execute it. It would also allow them to be plugin-based
+	 */
+	/* Determine builtin command and execute it */
+	if(strcmp(command->path, "prompt") == 0) {
+		builtinFunc = cmd_prompt;
+	} else if(strcmp(command->path, "exit") == 0) {
+		builtinFunc = cmd_exit;
+	}
+	builtinFunc(command->argc, command->argv);
+	builtinFunc = NULL;
+}
 
 void executeCommandsInQueue(queue_t *commandQueue)
 {
@@ -39,19 +57,23 @@ void executeCommandsInQueue(queue_t *commandQueue)
 
 	while(queueRemove(commandQueue, (void *)&currentCommand)) {
 		ASSERT(currentCommand != NULL, "NULL command to be executed\n");
-		pid = fork();
-		/* Child */
-		if(pid == 0) {
-			status = execvp(currentCommand->path, currentCommand->argv);
-			if(status != 0) {
-				fprintf(stderr, "mush: could not execute: %s\n", currentCommand->path);
-				exit(1);
-			}
+		if(commandIsBuiltIn(currentCommand)) {
+			_executeBuiltinCommand(currentCommand);
 		} else {
-			if(currentCommand->connectionMask != kCommandConnectionBackground) {
-				waitpid(pid, &status, 0);
+			pid = fork();
+			/* Child */
+			if(pid == 0) {
+				status = execvp(currentCommand->path, currentCommand->argv);
+				if(status != 0) {
+					fprintf(stderr, "mush: could not execute: %s\n", currentCommand->path);
+					exit(1);
+				}
+			} else {
+				if(currentCommand->connectionMask != kCommandConnectionBackground) {
+					waitpid(pid, &status, 0);
+				}
 			}
+			commandFree(currentCommand);
 		}
-		commandFree(currentCommand);
 	}
 }

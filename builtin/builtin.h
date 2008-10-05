@@ -19,32 +19,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-enum {
-	kCommandConnectionNone = 0,
-	kCommandConnectionPipe = 1,
-	kCommandConnectionBackground = 2,
-	kCommandConnectionSequential = 4,
-};
+#include "prompt.h"
+#include "exit.h"
 
-typedef struct __command_t {
-	/*! \brief path of the command */
-	char *path;
-	/*! \brief amount of command line arguments for the command */
-	int argc;
-	char **argv;
-	/*! \brief path to redirect output, or \a NULL */
-	char *redirectToPath;
-	/*! \brief path from which input is redirected, or \a NULL */
-	char *redirectFromPath;
-	/*! \brief whether to pipe the output to the next command */
-	int connectionMask;
-} command_t;
-
-command_t *commandNew();
-void commandSetPath(command_t *command, char *path);
-void commandSetArgs(command_t *command, int argc, char **argv);
-void commandSetRedirectToPath(command_t *command, char *redirectToPath);
-void commandSetRedirectFromPath(command_t *command, char *redirectFromPath);
-void commandSetConnectionMask(command_t *command, int connectionMask);
-void commandFree(command_t *command);
-int commandIsBuiltIn(command_t *command);
+typedef void (*commandBuiltinFunction)(int argc, char **argv);

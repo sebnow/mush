@@ -100,3 +100,9 @@ void commandFree(command_t *command)
 	}
 	free(command);
 }
+
+int commandIsBuiltIn(command_t *command)
+{
+	return strcmp(command->path, "prompt") == 0
+			|| strcmp(command->path, "exit") == 0;
+}
