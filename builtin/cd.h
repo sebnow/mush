@@ -19,9 +19,12 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "prompt.h"
-#include "exit.h"
-#include "pwd.h"
-#include "cd.h"
 
-typedef void (*commandBuiltinFunction)(int argc, char **argv);
+/*!
+ \brief Run the builtin "cd" command to change the current directory
+ 
+ If argc is greater than 1, it is assumed that argv[1] contains the path
+ \param argc count of elements in \a argv
+ \param argv arguments to be passed to the command
+ */
+void cmd_cd(int argc, char **argv);

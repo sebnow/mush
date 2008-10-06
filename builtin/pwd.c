@@ -19,9 +19,19 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "prompt.h"
-#include "exit.h"
 #include "pwd.h"
-#include "cd.h"
+#include <unistd.h>
+#include <limits.h>
+#include <stdio.h>
 
-typedef void (*commandBuiltinFunction)(int argc, char **argv);
+#ifndef _POSIX_PATH_MAX
+#define BUFFER_SIZE 1024
+#else
+#define BUFFER_SIZE (PATH_MAX-1)
+#endif
+
+void cmd_pwd(int argc, char **argv)
+{
+	char buffer[BUFFER_SIZE];
+	printf("%s\n", getcwd(buffer, BUFFER_SIZE));
+}

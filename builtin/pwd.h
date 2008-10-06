@@ -19,9 +19,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "prompt.h"
-#include "exit.h"
-#include "pwd.h"
-#include "cd.h"
 
-typedef void (*commandBuiltinFunction)(int argc, char **argv);
+/*!
+ \brief Run the builtin "pwd" command
+ \param argc count of elements in \a argv
+ \param argv arguments to be passed to the command
+ */
+void cmd_pwd(int argc, char **argv);

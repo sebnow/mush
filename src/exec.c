@@ -39,6 +39,10 @@ static void _executeBuiltinCommand(command_t *command)
 		builtinFunc = cmd_prompt;
 	} else if(strcmp(command->path, "exit") == 0) {
 		builtinFunc = cmd_exit;
+	} else if(strcmp(command->path, "pwd") == 0) {
+		builtinFunc = cmd_pwd;
+	} else if(strcmp(command->path, "cd") == 0) {
+		builtinFunc = cmd_cd;
 	}
 	builtinFunc(command->argc, command->argv);
 	builtinFunc = NULL;

@@ -19,9 +19,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "prompt.h"
-#include "exit.h"
-#include "pwd.h"
 #include "cd.h"
+#include <string.h>
+#include <unistd.h>
 
-typedef void (*commandBuiltinFunction)(int argc, char **argv);
+void cmd_cd(int argc, char **argv)
+{
+	if(argc > 1) {
+		chdir(argv[1]);
+	}
+}

@@ -104,5 +104,7 @@ void commandFree(command_t *command)
 int commandIsBuiltIn(command_t *command)
 {
 	return strcmp(command->path, "prompt") == 0
-			|| strcmp(command->path, "exit") == 0;
+	    || strcmp(command->path, "exit") == 0
+	    || strcmp(command->path, "pwd") == 0
+	    || strcmp(command->path, "cd") == 0;
 }
