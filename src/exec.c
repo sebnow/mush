@@ -51,8 +51,12 @@ static void _executeBuiltinCommand(command_t *command)
 void executeCommandsInQueue(queue_t *commandQueue)
 {
 	command_t *currentCommand = NULL;
+	command_t *previousCommand = NULL;
 	pid_t pid;
-	int status;
+	int pipeDescriptors[2];
+	int execStatus;
+	int pipeStatus;
+	int waitStatus;
 
 	/* Check if we have something to execute */
 	if(commandQueue == NULL) {
@@ -64,6 +68,13 @@ void executeCommandsInQueue(queue_t *commandQueue)
 		if(commandIsBuiltIn(currentCommand)) {
 			_executeBuiltinCommand(currentCommand);
 		} else {
+			/* Create the pipe before forking */
+			if(currentCommand->connectionMask == kCommandConnectionPipe) {
+				pipeStatus = pipe(pipeDescriptors);
+				if(pipeStatus != 0) {
+					fprintf(stderr, "mush: unable to create pipe\n");
+				}
+			}
 			pid = fork();
 			/* Child */
 			if(pid == 0) {
@@ -75,17 +86,31 @@ void executeCommandsInQueue(queue_t *commandQueue)
 				if(currentCommand->redirectFromPath != NULL) {
 					freopen(currentCommand->redirectFromPath, "r", stdin);
 				}
-				status = execvp(currentCommand->path, currentCommand->argv);
-				if(status != 0) {
+				/* Send stdout to the write end of the pipe */
+				if(currentCommand->connectionMask == kCommandConnectionPipe) {
+					dup2(pipeDescriptors[1], fileno(stdout));
+					close(pipeDescriptors[0]);
+				}
+				/* Redirect the read end into stdin */
+				if(previousCommand != NULL && previousCommand->connectionMask == kCommandConnectionPipe) {
+					dup2(pipeDescriptors[0], fileno(stdin));
+					close(pipeDescriptors[1]);
+				}
+				execStatus = execvp(currentCommand->path, currentCommand->argv);
+				if(execStatus != 0) {
 					fprintf(stderr, "mush: could not execute: %s\n", currentCommand->path);
 					exit(1);
 				}
 			} else {
 				if(currentCommand->connectionMask != kCommandConnectionBackground) {
-					waitpid(pid, &status, 0);
+					waitpid(pid, &waitStatus, 0);
 				}
 			}
-			commandFree(currentCommand);
+			if(previousCommand != NULL) {
+				commandFree(previousCommand);
+			}
+			previousCommand = currentCommand;
 		}
+		FREE(currentCommand);
 	}
 }
