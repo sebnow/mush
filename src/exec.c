@@ -49,7 +49,7 @@ void executeCommandsInQueue(queue_t *commandQueue)
 	command_t *currentCommand = NULL;
 	pid_t pid;
 	int status;
-	
+
 	/* Check if we have something to execute */
 	if(commandQueue == NULL) {
 		return;
@@ -63,6 +63,14 @@ void executeCommandsInQueue(queue_t *commandQueue)
 			pid = fork();
 			/* Child */
 			if(pid == 0) {
+				/* Redirect stdout to file if file is specified */
+				if(currentCommand->redirectToPath != NULL) {
+					freopen(currentCommand->redirectToPath, "w", stdout);
+				}
+				/* Redirect stdin to file if file is specified */
+				if(currentCommand->redirectFromPath != NULL) {
+					freopen(currentCommand->redirectFromPath, "r", stdin);
+				}
 				status = execvp(currentCommand->path, currentCommand->argv);
 				if(status != 0) {
 					fprintf(stderr, "mush: could not execute: %s\n", currentCommand->path);
