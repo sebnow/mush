@@ -182,11 +182,10 @@ queue_t *commandQueueFromInput(char *inputLine) {
 	char *dataEnd = NULL;
 	int isFinishedParsing = 0;
 	int redirectionType = kRedirectionTypeNone;
-	
-	/* TODO: Use these :) /
+
 	int isInSingleQuote = 0;
 	int isInDoubleQuote = 0;
-	/* */
+	int isInQuote = 0;
 	
 	if(inputLine == NULL) {
 		return NULL;
@@ -194,6 +193,13 @@ queue_t *commandQueueFromInput(char *inputLine) {
 	
 	/* Traverse the input string until it is parsed */
 	while(isFinishedParsing == 0) {
+		if(*inputPtr == '\'' && !isInDoubleQuote) {
+			isInSingleQuote = !isInSingleQuote;
+		}
+		if(*inputPtr == '"' && !isInSingleQuote) {
+			isInDoubleQuote = !isInDoubleQuote;
+		}
+		isInQuote = isInDoubleQuote || isInSingleQuote;
 		switch(currentState) {
 			case kMachineStateInitial:
 				/* Set everything up to be ready for parsing the next command */
@@ -214,7 +220,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				}
 				break;
 			case kMachineStateParsingPath:
-				if(*inputPtr == ' ' || *inputPtr == '\0' || _isTerminator(*inputPtr)) {
+				if((*inputPtr == ' ' && !isInQuote) || *inputPtr == '\0' || (_isTerminator(*inputPtr) && !isInQuote)) {
 					currentState = kMachineStateLeavingPath;
 				} else {
 					inputPtr++;
@@ -246,7 +252,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				}
 				break;
 			case kMachineStateParsingToken:
-				if(*inputPtr == ' ' || *inputPtr == '\0' || _isTerminator(*inputPtr)) {
+				if((*inputPtr == ' ' && !isInQuote) || *inputPtr == '\0' || (_isTerminator(*inputPtr) && !isInQuote)) {
 					currentState = kMachineStateLeavingToken;
 				} else {
 					inputPtr++;
