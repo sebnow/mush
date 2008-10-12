@@ -103,9 +103,9 @@ void executeCommandsInQueue(queue_t *commandQueue)
 				/* Expand globs */
 				if(currentCommand->argc > 1) {
 					globBuf.gl_offs = 1;
-					glob(currentCommand->argv[1], GLOB_DOOFFS, NULL, &globBuf);
+					glob(currentCommand->argv[1], GLOB_DOOFFS|GLOB_NOCHECK, NULL, &globBuf);
 					for(index = 2; index < currentCommand->argc; index++) {
-						glob(currentCommand->argv[index], GLOB_DOOFFS|GLOB_APPEND, NULL, &globBuf);
+						glob(currentCommand->argv[index], GLOB_DOOFFS|GLOB_APPEND|GLOB_NOCHECK, NULL, &globBuf);
 					}
 					globBuf.gl_pathv[0] = currentCommand->path;
 					wasGlobUsed = 1;
