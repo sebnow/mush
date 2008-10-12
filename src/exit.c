@@ -20,6 +20,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include "exit.h"
+#include <stdlib.h>
 
 void cmd_exit(int argc, char **argv)
 {
