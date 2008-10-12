@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <glob.h>
 #include "command.h"
 #include "util.h"
 #include "builtin.h"
@@ -57,6 +58,9 @@ void executeCommandsInQueue(queue_t *commandQueue)
 	int execStatus;
 	int pipeStatus;
 	int waitStatus;
+	glob_t globBuf;
+	int index;
+	int wasGlobUsed = 0;
 
 	/* Check if we have something to execute */
 	if(commandQueue == NULL) {
@@ -96,7 +100,20 @@ void executeCommandsInQueue(queue_t *commandQueue)
 					dup2(pipeDescriptors[0], fileno(stdin));
 					close(pipeDescriptors[1]);
 				}
-				execStatus = execvp(currentCommand->path, currentCommand->argv);
+				/* Expand globs */
+				if(currentCommand->argc > 1) {
+					globBuf.gl_offs = 1;
+					glob(currentCommand->argv[1], GLOB_DOOFFS, NULL, &globBuf);
+					for(index = 2; index < currentCommand->argc; index++) {
+						glob(currentCommand->argv[index], GLOB_DOOFFS|GLOB_APPEND, NULL, &globBuf);
+					}
+					globBuf.gl_pathv[0] = currentCommand->path;
+					wasGlobUsed = 1;
+					execStatus = execvp(currentCommand->path, &globBuf.gl_pathv[0]);
+				} else {
+					wasGlobUsed = 0;
+					execStatus = execvp(currentCommand->path, currentCommand->argv);
+				}
 				if(execStatus != 0) {
 					fprintf(stderr, "mush: could not execute: %s\n", currentCommand->path);
 					exit(1);
@@ -112,5 +129,8 @@ void executeCommandsInQueue(queue_t *commandQueue)
 			previousCommand = currentCommand;
 		}
 		FREE(currentCommand);
+		if(wasGlobUsed) {
+			globfree(&globBuf);
+		}
 	}
 }
