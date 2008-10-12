@@ -136,7 +136,11 @@ static void _addTokensToCommand(queue_t *tokens, command_t *command)
 {
 	char *token;
 	char **argv = NULL;
-	size_t count = queueCount(tokens) + 1;
+	size_t count;
+
+	ASSERT(command != NULL, "command is not initialised");
+
+	count = queueCount(tokens) + 1;
 	if(count == 0) {
 		return;
 	}
@@ -204,11 +208,15 @@ queue_t *commandQueueFromInput(char *inputLine) {
 			case kMachineStateInitial:
 				/* Set everything up to be ready for parsing the next command */
 				ASSERT(command == NULL, "command already initialised\n");
-				command = commandNew();
-				if(command == NULL) {
-					return NULL;
+				if(*inputPtr == '\0') {
+					currentState = kMachineStateTerminal;
+				} else {
+					command = commandNew();
+					if(command == NULL) {
+						return NULL;
+					}
+					currentState = kMachineStateEnteringPath;
 				}
-				currentState = kMachineStateEnteringPath;
 				break;
 			case kMachineStateEnteringPath:
 				/* Set up everything to parse the path */
@@ -304,9 +312,11 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				break;
 			case kMachineStateTerminal:
 				isFinishedParsing = 1;
-				_addTokensToCommand(tokens, command);
-				queueInsert(commandQueue, command);
-				command = NULL;
+				if(command != NULL) {
+					_addTokensToCommand(tokens, command);
+					queueInsert(commandQueue, command);
+					command = NULL;
+				}
 				break;
 			default:
 			case kMachineStateDefault:
