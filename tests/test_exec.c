@@ -20,15 +20,5 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef TESTING_UTIL_H
-#define TESTING_UTIL_H
-#if UNIT_TESTING
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmockery.h>
+#include "test_exec.h"
 
-#define assert(expression) \
-	mock_assert((int)(expression), #expression, __FILE__, __LINE__);
-#endif
-#endif

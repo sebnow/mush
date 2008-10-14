@@ -20,15 +20,34 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef TESTING_UTIL_H
-#define TESTING_UTIL_H
-#if UNIT_TESTING
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmockery.h>
 
-#define assert(expression) \
-	mock_assert((int)(expression), #expression, __FILE__, __LINE__);
-#endif
-#endif
+#include "test_queue.h"
+#include "test_command.h"
+#include "test_parser.h"
+#include "test_builtin.h"
+
+int main(int argc, char* argv[]) {
+	const UnitTest tests[] = {
+		unit_test(testQueueNew),
+		unit_test(testQueueInsert),
+		unit_test(testQueueRemove),
+		unit_test(testQueueCount),
+		unit_test(testCommandNew),
+		unit_test(testCommandSetPath),
+		unit_test(testCommandSetRedirectToPath),
+		unit_test(testCommandSetRedirectFromPath),
+		unit_test(testCommandSetConnectionMask),
+		unit_test(testCommandIsBuiltin),
+		unit_test(testParseSingleCommand),
+		unit_test(testParseMultipleCommands),
+		unit_test(testParseTerminators),
+		unit_test(testParseRedirection),
+		unit_test(testPrompt),
+		unit_test(testCd),
+	};
+	return run_tests(tests);
+}

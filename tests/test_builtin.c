@@ -20,15 +20,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef TESTING_UTIL_H
-#define TESTING_UTIL_H
-#if UNIT_TESTING
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
 #include <cmockery.h>
+#include <unistd.h>
+#include "test_builtin.h"
+#include "command.h"
+#include "builtin.h"
 
-#define assert(expression) \
-	mock_assert((int)(expression), #expression, __FILE__, __LINE__);
-#endif
-#endif
+void testPrompt(void **state)
+{
+	char *argv1[3] = {"prompt", "testing", NULL};
+	char *argv2[2] = {"prompt", NULL};
+	char *argv3[6] = {"prompt", "this",  "is", "a", "test", NULL};
+	cmd_prompt(2, argv1);
+	assert_string_equal(getPrompt(), "testing");
+	cmd_prompt(1, argv2);
+	assert_string_equal(getPrompt(), "");
+	cmd_prompt(5, argv3);
+	assert_string_equal(getPrompt(), "this is a test");
+}
+
+void testCd(void **state)
+{
+	char *argv[3] = {"cd", "/", NULL};
+	char *cwd;
+	cmd_cd(2, argv);
+	cwd = malloc(32 * sizeof(*cwd));
+	cwd = getcwd(cwd, 32);
+	assert_string_equal(cwd, "/");
+	free(cwd);
+}

@@ -10,15 +10,14 @@ OBJ = build/cd.o \
       build/pwd.o \
       build/command.o \
       build/exec.o \
-      build/main.o \
       build/parser.o \
       build/queue.o
 
 all: build/ $(APPNAME)
 
-$(APPNAME): $(OBJ)
+$(APPNAME): $(OBJ) build/main.o
 	@echo "LINK $@"
-	@$(LINK.cc) -o $@ $(OBJ)
+	@$(LINK.cc) -o $@ $(OBJ) build/main.o
 
 clean:
 	$(RM) -r build/
@@ -38,3 +37,4 @@ distclean: clean
 	$(RM) $(TARBALL)
 
 -include Rules.mk
+-include Tests.mk
