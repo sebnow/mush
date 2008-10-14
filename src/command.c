@@ -44,7 +44,11 @@ command_t *commandNew()
 void commandSetPath(command_t *command, char *path)
 {
 	assert(command != NULL);
-	command->path = strdup(path);
+	if(path == NULL) {
+		command->path = NULL;
+	} else {
+		command->path = strdup(path);
+	}
 }
 
 void commandSetArgs(command_t *command, int argc, char **argv)
@@ -59,8 +63,9 @@ void commandSetRedirectToPath(command_t *command, char *redirectToPath)
 	assert(command != NULL);
 	if(redirectToPath == NULL) {
 		command->redirectToPath = NULL;
+	} else {
+		command->redirectToPath = strdup(redirectToPath);
 	}
-	command->redirectToPath = strdup(redirectToPath);
 }
 
 void commandSetRedirectFromPath(command_t *command, char *redirectFromPath)
@@ -68,8 +73,9 @@ void commandSetRedirectFromPath(command_t *command, char *redirectFromPath)
 	assert(command != NULL);
 	if(redirectFromPath == NULL) {
 		command->redirectFromPath = NULL;
+	} else {
+		command->redirectFromPath = strdup(redirectFromPath);
 	}
-	command->redirectFromPath = strdup(redirectFromPath);
 }
 
 void commandSetConnectionMask(command_t *command, int connectionMask)
