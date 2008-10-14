@@ -19,31 +19,19 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include <stdio.h>
 
-#define FREE(p) do { free(p); p = NULL; } while(0)
-#define STRDUP(r, s, action) do {\
-	if(s != NULL) {\
-		r = strdup(s);\
-		if(r == NULL) {\
-			action;\
-		}\
-	} else {\
-		r = NULL;\
-	}\
-} while(0)
+#ifndef TESTING_UTIL_H
+#define TESTING_UTIL_H
+#if UNIT_TESTING
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmockery.h>
 
-#ifdef NDEBUG
-#define	ASSERTF(cond, str, ...) ((void)0)
-#define	ASSERT(cond, str) ((void)0)
-#else
-#define ASSERTF(cond, str, ...) do {\
-	if(!(cond)) {\
-		printf("*** Assertion failure in %s, %s:%d\n", __func__, __FILE__, __LINE__);\
-		printf(str, __VA_ARGS__);\
-		abort();\
-	}\
-} while(0)
-#define ASSERT(cond, str) ASSERTF(cond, str, NULL)
+#define malloc test_malloc
+#define calloc test_calloc
+#define free test_free
+#define assert(expression) \
+	mock_assert((int)(expression), #expression, __FILE__, __LINE__);
 #endif
-
+#endif

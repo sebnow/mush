@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-#include "util.h"
+#include "testing_util.h"
 
 #define PATH_SEPARATOR ':'
 
@@ -64,7 +64,7 @@ char *filepathForCommand(char *command)
 	char separator[2] = {PATH_SEPARATOR, '\0'};
 	char *filepath = NULL;
 	
-	ASSERT(command != NULL, "command can not be NULL");
+	assert(command != NULL);
 	
 	if(strchr(command, '/') != NULL) {
 		return command;

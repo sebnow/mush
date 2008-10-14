@@ -21,7 +21,7 @@
  */
 #include "prompt.h"
 #include <stdlib.h>
-#include "util.h"
+#include "testing_util.h"
 
 static char *g_prompt = NULL;
 
@@ -33,7 +33,8 @@ void cmd_prompt(int argc, char **argv)
 	int argi;
 
 	if(g_prompt != NULL) {
-		FREE(g_prompt);
+		free(g_prompt);
+		g_prompt = NULL;
 	}
 	newSize = 0;
 	/* Determine the size of the prompt */

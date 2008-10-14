@@ -26,8 +26,8 @@
 #include <string.h>
 #include <glob.h>
 #include "command.h"
-#include "util.h"
 #include "builtin.h"
+#include "testing_util.h"
 
 static void _executeBuiltinCommand(command_t *command)
 {
@@ -68,7 +68,7 @@ void executeCommandsInQueue(queue_t *commandQueue)
 	}
 
 	while(queueRemove(commandQueue, (void *)&currentCommand)) {
-		ASSERT(currentCommand != NULL, "NULL command to be executed\n");
+		assert(currentCommand != NULL);
 		if(commandIsBuiltIn(currentCommand)) {
 			_executeBuiltinCommand(currentCommand);
 		} else {
@@ -128,7 +128,8 @@ void executeCommandsInQueue(queue_t *commandQueue)
 			}
 			previousCommand = currentCommand;
 		}
-		FREE(currentCommand);
+		free(currentCommand);
+		currentCommand = NULL;
 		if(wasGlobUsed) {
 			globfree(&globBuf);
 		}

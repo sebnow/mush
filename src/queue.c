@@ -20,8 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include "queue.h"
-#include "util.h"
 #include <stdlib.h>
+#include "testing_util.h"
 
 queue_t *queueNew()
 {
@@ -38,7 +38,7 @@ queue_t *queueNew()
 void queueInsert(queue_t *queue, void *data)
 {
 	_queue_node_t *node;
-	ASSERT(queue != NULL, "queue not initialized prior to pushing\n");
+	assert(queue != NULL);
 	node = malloc(sizeof(*node));
 	if(node == NULL) {
 		return;
@@ -68,6 +68,9 @@ int queueRemove(queue_t *queue, void **data)
 	free(queue->head);
 	queue->head = node;
 	queue->count--;
+	if(queue->head == NULL) {
+		queue->tail = NULL;
+	}
 	return 1;
 }
 

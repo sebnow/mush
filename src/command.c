@@ -22,7 +22,7 @@
 #include "command.h"
 #include <string.h>
 #include <stdlib.h>
-#include "util.h"
+#include "testing_util.h"
 
 command_t *commandNew()
 {
@@ -43,20 +43,20 @@ command_t *commandNew()
 
 void commandSetPath(command_t *command, char *path)
 {
-	ASSERT(command != NULL, "command can not be null");
+	assert(command != NULL);
 	command->path = strdup(path);
 }
 
 void commandSetArgs(command_t *command, int argc, char **argv)
 {
-	ASSERT(command != NULL, "command can not be null");
+	assert(command != NULL);
 	command->argc = argc;
 	command->argv = argv;
 }
 
 void commandSetRedirectToPath(command_t *command, char *redirectToPath)
 {
-	ASSERT(command != NULL, "command can not be null");
+	assert(command != NULL);
 	if(redirectToPath == NULL) {
 		command->redirectToPath = NULL;
 	}
@@ -65,7 +65,7 @@ void commandSetRedirectToPath(command_t *command, char *redirectToPath)
 
 void commandSetRedirectFromPath(command_t *command, char *redirectFromPath)
 {
-	ASSERT(command != NULL, "command can not be null");
+	assert(command != NULL);
 	if(redirectFromPath == NULL) {
 		command->redirectFromPath = NULL;
 	}
@@ -74,29 +74,33 @@ void commandSetRedirectFromPath(command_t *command, char *redirectFromPath)
 
 void commandSetConnectionMask(command_t *command, int connectionMask)
 {
-	ASSERT(command != NULL, "command can not be null");
+	assert(command != NULL);
 	command->connectionMask = connectionMask;
 }
 
 void commandFree(command_t *command)
 {
 	char **argv = command->argv;
-	ASSERT(command != NULL, "command can not be null");
+	assert(command != NULL);
 	if(argv != NULL) {
 		do{
-			FREE(*argv);
+			free(*argv);
+			*argv = NULL;
 			argv++;
 		} while(*argv != NULL);
-		FREE(command->argv);
+		free(command->argv);
+		command->argv = NULL;
 		argv = NULL;
 	}
 	/* path is an alias for argv[0], which has already been freed */
 	command->path = NULL;
 	if(command->redirectToPath != NULL) {
-		FREE(command->redirectToPath);
+		free(command->redirectToPath);
+		command->redirectToPath = NULL;
 	}
 	if(command->redirectFromPath != NULL) {
-		FREE(command->redirectFromPath);
+		free(command->redirectFromPath);
+		command->redirectFromPath = NULL;
 	}
 	free(command);
 }

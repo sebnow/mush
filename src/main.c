@@ -25,8 +25,8 @@
 #include "path.h"
 #include "parser.h"
 #include "exec.h"
-#include "util.h"
 #include "prompt.h"
+#include "testing_util.h"
 
 /*!
  \brief Main program loop

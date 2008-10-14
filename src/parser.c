@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "util.h"
+#include "testing_util.h"
 #include "command.h"
 #include "queue.h"
 #include "path.h"
@@ -89,11 +89,11 @@ static void _setCommandPath(command_t *command, const char *path, size_t n) {
 	str = strncpy(str, path, n);
 	*(str + n + 1) = '\0';
 	commandSetPath(command, str);
-	FREE(str);
+	free(str);
 }
 
 static void _setConnectionMaskBasedOnCharacter(command_t *command, char chr) {
-	ASSERT(command != NULL, "command can not be null\n");
+	assert(command != NULL);
 	switch(chr) {
 		case '|':
 			commandSetConnectionMask(command, kCommandConnectionPipe);
@@ -128,7 +128,7 @@ static void _setRedirectionBasedOnType(command_t *command, int redirectionType, 
 	} else if(redirectionType == kRedirectionTypeIn) {
 		commandSetRedirectFromPath(command, str);
 	}
-	FREE(str);
+	free(str);
 }
 
 
@@ -138,7 +138,7 @@ static void _addTokensToCommand(queue_t *tokens, command_t *command)
 	char **argv = NULL;
 	size_t count;
 
-	ASSERT(command != NULL, "command is not initialised");
+	assert(command != NULL);
 
 	count = queueCount(tokens) + 1;
 	if(count == 0) {
@@ -207,7 +207,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 		switch(currentState) {
 			case kMachineStateInitial:
 				/* Set everything up to be ready for parsing the next command */
-				ASSERT(command == NULL, "command already initialised\n");
+				assert(command == NULL);
 				if(*inputPtr == '\0') {
 					currentState = kMachineStateTerminal;
 				} else {
@@ -251,7 +251,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				inputPtr++;
 				break;
 			case kMachineStateEnteringToken:
-				ASSERT(tokens != NULL, "token queue not initialized\n");
+				assert(tokens != NULL);
 				if(isspace(*inputPtr)) {
 					inputPtr++;
 				} else {
