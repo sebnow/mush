@@ -47,6 +47,8 @@ Requirements
 Mush has been tested on Mac OS and Linux, but it should run on any POSIX
 compliant system. Mush does not depend on any libraries.
 
+The unit tests, however, use [Cmockery](http://cmockery.googlecode.com).
+
 License
 =======
 
