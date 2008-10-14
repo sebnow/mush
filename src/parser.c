@@ -243,6 +243,13 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				currentState = kMachineStateDefault;
 				break;
 			case kMachineStateParsingCommandTerminator:
+				if(command == NULL) {
+					if(_isTerminator(*(inputPtr - 1))) {
+						fprintf(stderr, "mush: parse error near '%c%c'\n", *(inputPtr - 1), *inputPtr);
+						return NULL;
+					}
+					assert(0);
+				}
 				_setConnectionMaskBasedOnCharacter(command, *inputPtr);
 				_addTokensToCommand(tokens, command);
 				queueInsert(commandQueue, command);
