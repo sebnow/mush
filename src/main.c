@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include "parser.h"
 #include "exec.h"
 #include "prompt.h"
@@ -38,6 +39,10 @@ static void run();
  */
 static const char *getInput();
 
+static void signalHandler(int signal);
+static void setupSignalHandler();
+static void claimChildren();
+
 /*! \brief Initial size of the input buffer */
 #define INPUT_BUFFER_SIZE_INITIAL 24
 /*! \brief Multiplier by which the input buffer's size increases */
@@ -47,6 +52,7 @@ int main()
 {
 	char *prompt_argv[2] = {"prompt", "% "};
 	cmd_prompt(2, prompt_argv);
+	setupSignalHandler();
 	run();
 	return 0;
 }
@@ -93,4 +99,32 @@ const char *getInput()
 	}
 	buffer[inputLength] = '\0';
 	return buffer;
+}
+
+static void setupSignalHandler()
+{
+	struct sigaction act;
+	act.sa_flags = 0;
+	act.sa_handler = signalHandler;
+	sigfillset(&(act.sa_mask) );
+
+	if(sigaction(SIGCHLD, &act, NULL) != 0) {
+		fprintf(stderr, "mush: unable to setup signal handler\n");
+		exit(1);
+	}
+}
+
+static void signalHandler(int signal)
+{
+	if(signal == SIGCHLD) {
+		claimChildren();
+	}
+}
+
+static void claimChildren()
+{
+	pid_t pid;
+	do {
+		pid = waitpid(0, NULL, WNOHANG);
+	} while(pid > 0);
 }
