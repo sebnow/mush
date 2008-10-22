@@ -197,10 +197,10 @@ queue_t *commandQueueFromInput(char *inputLine) {
 	
 	/* Traverse the input string until it is parsed */
 	while(isFinishedParsing == 0) {
-		if(*inputPtr == '\'' && !isInDoubleQuote) {
+		if(*inputPtr == '\'' && !isInDoubleQuote && (inputPtr-1) != NULL && *(inputPtr-1) != '\\') {
 			isInSingleQuote = !isInSingleQuote;
 		}
-		if(*inputPtr == '"' && !isInSingleQuote) {
+		if(*inputPtr == '"' && !isInSingleQuote && (inputPtr-1) != NULL && *(inputPtr-1) != '\\') {
 			isInDoubleQuote = !isInDoubleQuote;
 		}
 		isInQuote = isInDoubleQuote || isInSingleQuote;
