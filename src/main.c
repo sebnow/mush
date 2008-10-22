@@ -41,7 +41,7 @@ static const char *getInput();
 /*! \brief Initial size of the input buffer */
 #define INITIAL_INPUT_BUFFER_SIZE 24
 
-int main(int argc, char **argv)
+int main()
 {
 	char *prompt_argv[2] = {"prompt", "% "};
 	cmd_prompt(2, prompt_argv);
