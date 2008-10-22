@@ -45,6 +45,9 @@ command_t *commandNew()
 void commandSetPath(command_t *command, char *path)
 {
 	assert(command != NULL);
+	if(command->path != NULL) {
+		free(command->path);
+	}
 	if(path == NULL) {
 		command->path = NULL;
 	} else {
@@ -62,6 +65,9 @@ void commandSetArgs(command_t *command, int argc, char **argv)
 void commandSetRedirectToPath(command_t *command, char *redirectToPath)
 {
 	assert(command != NULL);
+	if(command->redirectToPath == NULL) {
+		free(command->redirectToPath);
+	}
 	if(redirectToPath == NULL) {
 		command->redirectToPath = NULL;
 	} else {
@@ -72,6 +78,9 @@ void commandSetRedirectToPath(command_t *command, char *redirectToPath)
 void commandSetRedirectFromPath(command_t *command, char *redirectFromPath)
 {
 	assert(command != NULL);
+	if(command->redirectFromPath == NULL) {
+		free(command->redirectFromPath);
+	}
 	if(redirectFromPath == NULL) {
 		command->redirectFromPath = NULL;
 	} else {
