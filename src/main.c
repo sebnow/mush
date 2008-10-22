@@ -52,9 +52,11 @@ int main()
 void run()
 {
 	char *input = NULL;
+	char *prompt = NULL;
 	queue_t *commandQueue = NULL;
 	do {
-		printf(getPrompt());
+		prompt = getPrompt();
+		printf("%s", prompt);
 		/* Free input buffer from previous loop run */
 		if(input != NULL) {
 			free(input);

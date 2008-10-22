@@ -21,6 +21,7 @@
  */
 #include "prompt.h"
 #include <stdlib.h>
+#include <string.h>
 #include "testing_util.h"
 
 static char *g_prompt = NULL;
@@ -39,17 +40,10 @@ void cmd_prompt(int argc, char **argv)
 	newSize = 0;
 	/* Determine the size of the prompt */
 	for(argi = 1; argi < argc; argi++) {
-		str = argv[argi];
-		do{
-			/* Add extra space for '%' characters to enable escaping */
-			if(*str == '%') {
-				newSize++;
-			}
-			newSize++;
-		} while(*(++str) != '\0');
+		newSize = strlen(argv[argi]);
 		newSize++; /* space */
 	}
-	newSize++; /* terminator */
+	/* Previous extra size for "space" can be used for the terminator */
 
 	g_prompt = malloc(newSize * sizeof(*g_prompt));
 	promptPtr = g_prompt;
@@ -60,23 +54,11 @@ void cmd_prompt(int argc, char **argv)
 	/* Copy the prompt */
 	for(argi = 1; argi < argc; argi++) {
 		str = argv[argi];
-		do {
-			/* Escpape '%' characters for printf */
-			if(*str == '%') {
-				*promptPtr = '%';
-				*promptPtr++;
-			}
-			*promptPtr = *str;
-			promptPtr++;
-			str++;
-		} while(*str != '\0');
-		/* Only add a space between "arguments", not after the last one */
-		if(argi != argc - 1) {
-			*promptPtr = ' ';
+		strcat(promptPtr, str);
+		if(argi < (argc - 1)) {
+			promptPtr[strlen(promptPtr)] = ' ';
 		}
-		promptPtr++;
 	}
-	*promptPtr = '\0';
 }
 
 char *getPrompt()
