@@ -22,6 +22,7 @@
 #include "command.h"
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "testing_util.h"
 
 command_t *commandNew()

@@ -21,6 +21,7 @@
  */
 #include "queue.h"
 #include <stdlib.h>
+#include <assert.h>
 #include "testing_util.h"
 
 queue_t *queueNew()

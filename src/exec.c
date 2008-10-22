@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <glob.h>
+#include <assert.h>
 #include "command.h"
 #include "builtin.h"
 #include "testing_util.h"
