@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "path.h"
 #include "parser.h"
 #include "exec.h"
 #include "prompt.h"

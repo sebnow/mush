@@ -29,7 +29,6 @@
 #include "testing_util.h"
 #include "command.h"
 #include "queue.h"
-#include "path.h"
 
 enum {
 	/*! No redirection */
