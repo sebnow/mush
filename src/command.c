@@ -87,18 +87,8 @@ void commandSetConnectionMask(command_t *command, int connectionMask)
 
 void commandFree(command_t *command)
 {
-	char **argv = command->argv;
 	assert(command != NULL);
-	if(argv != NULL) {
-		do{
-			free(*argv);
-			*argv = NULL;
-			argv++;
-		} while(*argv != NULL);
-		free(command->argv);
-		command->argv = NULL;
-		argv = NULL;
-	}
+	command->argv = NULL;
 	/* path is an alias for argv[0], which has already been freed */
 	command->path = NULL;
 	if(command->redirectToPath != NULL) {
