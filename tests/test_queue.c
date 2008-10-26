@@ -41,13 +41,13 @@ void testQueueInsert(void **state)
 	int data[3] = {1, 2, 3};
 	void *headPtr;
 	assert_true(queue != NULL);
-	queueInsert(queue, &data[0]);
+	queueInsert(queue, &data[0], NULL);
 	assert_true(queue->tail != NULL);
 	assert_true(queue->head != NULL);
 	assert_true(queue->tail == queue->head);
 	assert_true(queue->head->data == &data[0]);
 	headPtr = queue->head;
-	queueInsert(queue, &data[1]);
+	queueInsert(queue, &data[1], NULL);
 	/* Make sure head was not changed */
 	assert_true(headPtr == queue->head);
 	/* Data in head should also be the same */
@@ -55,7 +55,7 @@ void testQueueInsert(void **state)
 	/* Check that data was added to the tail */
 	assert_true(queue->tail->data == &data[1]);
 
-	queueInsert(queue, &data[2]);
+	queueInsert(queue, &data[2], NULL);
 	/* Head should still have the same data */
 	assert_true(queue->head->data == &data[0]);
 	/* Check that the nodes are connected properly */
@@ -75,12 +75,12 @@ void testQueueRemove(void **state)
 	int index;
 	int *ptr;
 
-	queueInsert(queue, &data[0]);
+	queueInsert(queue, &data[0], NULL);
 	queueRemove(queue, (void *)&ptr);
 	assert_int_equal(*ptr, data[0]);
 
 	for(index = 0; index < dataCount; index++) {
-		queueInsert(queue, &data[index]);
+		queueInsert(queue, &data[index], NULL);
 	}
 	for(index = 0; index < dataCount; index++) {
 		queueRemove(queue, (void *)&ptr);
@@ -95,9 +95,9 @@ void testQueueCount(void **state)
 
 	int data = 1;
 	assert_int_equal(queueCount(queue), 0);
-	queueInsert(queue, &data);
+	queueInsert(queue, &data, NULL);
 	assert_int_equal(queueCount(queue), 1);
-	queueInsert(queue, &data);
+	queueInsert(queue, &data, NULL);
 	assert_int_equal(queueCount(queue), 2);
 	queueRemove(queue, (void *)&data);
 	assert_int_equal(queueCount(queue), 1);
