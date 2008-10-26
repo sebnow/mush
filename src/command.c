@@ -65,7 +65,7 @@ void commandSetArgs(command_t *command, int argc, char **argv)
 void commandSetRedirectToPath(command_t *command, char *redirectToPath)
 {
 	assert(command != NULL);
-	if(command->redirectToPath == NULL) {
+	if(command->redirectToPath != NULL) {
 		free(command->redirectToPath);
 	}
 	if(redirectToPath == NULL) {
