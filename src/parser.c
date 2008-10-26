@@ -246,6 +246,8 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				if(command == NULL) {
 					if(_isTerminator(*(inputPtr - 1))) {
 						fprintf(stderr, "mush: parse error near '%c%c'\n", *(inputPtr - 1), *inputPtr);
+						queueFree(commandQueue);
+						queueFree(tokens);
 						return NULL;
 					}
 					assert(0);
@@ -298,6 +300,8 @@ queue_t *commandQueueFromInput(char *inputLine) {
 						inputPtr++;
 					}	else if(*inputPtr == '\0' || _isTerminator(*inputPtr)) {
 						fprintf(stderr, "mush: parse error near '%c'\n", *inputPtr);
+						queueFree(commandQueue);
+						queueFree(tokens);
 						return NULL;
 					} else {
 						dataStart = inputPtr;
