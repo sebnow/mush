@@ -171,7 +171,11 @@ static void _addTokenToQueue(queue_t *queue, char *token, size_t n) {
 	memset(str, 0, size);
 	str = strncpy(str, token, n);
 	*(str + size) = '\0';
+#if UNIT_TESTING
+	queueInsert(queue, str, NULL);
+#else
 	queueInsert(queue, str, free);
+#endif
 }
 
 queue_t *commandQueueFromInput(char *inputLine) {
