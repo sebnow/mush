@@ -28,9 +28,6 @@
 #include <setjmp.h>
 #include <cmockery.h>
 
-#define malloc test_malloc
-#define calloc test_calloc
-#define free test_free
 #define assert(expression) \
 	mock_assert((int)(expression), #expression, __FILE__, __LINE__);
 #endif
