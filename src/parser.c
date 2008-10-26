@@ -171,7 +171,7 @@ static void _addTokenToQueue(queue_t *queue, char *token, size_t n) {
 	memset(str, 0, size);
 	str = strncpy(str, token, n);
 	*(str + size) = '\0';
-	queueInsert(queue, str);
+	queueInsert(queue, str, free);
 }
 
 queue_t *commandQueueFromInput(char *inputLine) {
@@ -252,7 +252,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				}
 				_setConnectionMaskBasedOnCharacter(command, *inputPtr);
 				_addTokensToCommand(tokens, command);
-				queueInsert(commandQueue, command);
+				queueInsert(commandQueue, command, (queueNodeFreeFunction)commandFree);
 				command = NULL;
 				currentState = kMachineStateInitial;
 				inputPtr++;
@@ -321,7 +321,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 				isFinishedParsing = 1;
 				if(command != NULL) {
 					_addTokensToCommand(tokens, command);
-					queueInsert(commandQueue, command);
+					queueInsert(commandQueue, command, (queueNodeFreeFunction)commandFree);
 					command = NULL;
 				}
 				break;

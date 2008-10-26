@@ -30,11 +30,16 @@
  \{
  */
 
+/*! \brief Prototype for the function callback used to free queue node data */
+typedef void (*queueNodeFreeFunction)(void *);
+
 typedef struct __queue_node_t {
 	/*! \brief The data stored in the node */
 	void *data;
 	/*! \brief Next node in the queue */
 	struct __queue_node_t *next;
+	/*! \brief Callback used for freeing \a data */
+	queueNodeFreeFunction freeFunction;
 } _queue_node_t;
 
 /*!
@@ -59,8 +64,9 @@ queue_t *queueNew();
  \brief Insert \a data at the end of the \a queue
  \param queue queue to insert data into
  \param data data to be inserted
+ \param func function to be called to free \a data
  */
-void queueInsert(queue_t *queue, void *data);
+void queueInsert(queue_t *queue, void *data, queueNodeFreeFunction func);
 
 /*!
  \brief Remove element from the front of the \a queue
@@ -79,6 +85,9 @@ size_t queueCount(queue_t *queue);
 
 /*!
  \brief Free memory taken up by \a queue
+
+ If \a freeFunction is not \c NULL the node data will also be freed
+
  \param queue queue to be freed
  */
 void queueFree(queue_t *queue);

@@ -36,7 +36,7 @@ queue_t *queueNew()
 	return queue;
 }
 
-void queueInsert(queue_t *queue, void *data)
+void queueInsert(queue_t *queue, void *data, queueNodeFreeFunction func)
 {
 	_queue_node_t *node;
 	assert(queue != NULL);
@@ -46,6 +46,7 @@ void queueInsert(queue_t *queue, void *data)
 	}
 	node->next = NULL;
 	node->data = data;
+	node->freeFunction = func;
 	/* First node in queue */
 	if(queue->tail == NULL) {
 		queue->tail = node;
@@ -83,6 +84,15 @@ size_t queueCount(queue_t *queue)
 void queueFree(queue_t *queue)
 {
 	void *data = NULL;
-	while(queueRemove(queue, &data)) { }
+	queueNodeFreeFunction freeFunction;
+	if(queue->head != NULL) {
+		freeFunction = queue->head->freeFunction;
+		while(queueRemove(queue, &data)) {
+			if(freeFunction != NULL && data != NULL) {
+				freeFunction(data);
+			}
+			freeFunction = queue->head->freeFunction;
+		}
+	}
 	free(queue);
 }
