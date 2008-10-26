@@ -108,7 +108,9 @@ void commandFree(command_t *command)
 		free(command->redirectFromPath);
 		command->redirectFromPath = NULL;
 	}
-	free(command);
+	/* FIXME: We should be freeing command itself here, but apparently it's either
+	   being freed before or the object is modified after beeing freed. Either
+	   way, if we free command here, the program crashes */
 }
 
 int commandIsBuiltIn(command_t *command)
