@@ -70,7 +70,7 @@ void run()
 
 const char *getInput()
 {
-	char *buffer = malloc(INITIAL_INPUT_BUFFER_SIZE * sizeof(*buffer));
+	char *buffer = malloc(INITIAL_INPUT_BUFFER_SIZE * sizeof(char));
 	int input;
 	size_t inputLength = 0;
 	size_t bufferSize = INITIAL_INPUT_BUFFER_SIZE;
@@ -79,13 +79,13 @@ const char *getInput()
 	}
 	input = fgetc(stdin);
 	/* Get input until we get EOF or a new line */
-	while(input != EOF && input != '\n') {
+	while(input != EOF && (char)input != '\n') {
 		/* Increase the buffer size if necessary */
 		if(inputLength >= bufferSize) {
 			bufferSize = bufferSize * 1.5;
 			buffer = realloc(buffer, bufferSize * sizeof(*buffer));
 		}
-		buffer[inputLength] = input;
+		buffer[inputLength] = (char)input;
 		inputLength++;
 		input = fgetc(stdin);
 	}
