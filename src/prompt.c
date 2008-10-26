@@ -50,6 +50,7 @@ void cmd_prompt(int argc, char **argv)
 	if(promptPtr == NULL) {
 		return;
 	}
+	memset(g_prompt, 0, newSize * sizeof(*g_prompt));
 
 	/* Copy the prompt */
 	for(argi = 1; argi < argc; argi++) {
