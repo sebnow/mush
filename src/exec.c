@@ -32,7 +32,7 @@
 
 static void _executeBuiltinCommand(command_t *command)
 {
-	commandBuiltinFunction builtinFunc;
+	commandBuiltinFunction builtinFunc = NULL;
 	/* TODO: Ideally this should be in a hash table so it is easier to look up
 	 the command and execute it. It would also allow them to be plugin-based
 	 */
@@ -46,6 +46,7 @@ static void _executeBuiltinCommand(command_t *command)
 	} else if(strcmp(command->path, "cd") == 0) {
 		builtinFunc = cmd_cd;
 	}
+	assert(builtinFunc != NULL);
 	builtinFunc(command->argc, command->argv);
 	builtinFunc = NULL;
 }
