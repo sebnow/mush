@@ -19,6 +19,12 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+
+/*!
+ \addtogroup command
+ \{
+ */
+
 enum {
 	kCommandConnectionNone = 0,
 	kCommandConnectionPipe = 1,
@@ -48,3 +54,7 @@ void commandSetRedirectFromPath(command_t *command, char *redirectFromPath);
 void commandSetConnectionMask(command_t *command, int connectionMask);
 void commandFree(command_t *command);
 int commandIsBuiltIn(command_t *command);
+
+/*!
+ \}
+ */

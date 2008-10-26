@@ -24,4 +24,14 @@
 #include "pwd.h"
 #include "cd.h"
 
+/*!
+ \addtogroup builtin Builtin functions
+ \{
+ */
+
+/*! \brief Interface for all builtin command functions */
 typedef void (*commandBuiltinFunction)(int argc, char **argv);
+
+/*!
+ \}
+ */

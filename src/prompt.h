@@ -21,11 +21,20 @@
  */
 
 /*!
+ \addtogroup builtin
+ \{
+ */
+
+/*!
  \brief Run the "prompt" command with the specified arguments
  \param argc count of elements in \a argv
  \param argv arguments to be passed to the command
  */
 void cmd_prompt(int argc, char **argv);
+
+/*!
+ \}
+ */
 
 /*!
  \brief Return the prompt string

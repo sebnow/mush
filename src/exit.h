@@ -21,6 +21,11 @@
  */
 
 /*!
+ \addtogroup builtin
+ \{
+ */
+
+/*!
  \brief Run the builtin "exit" command
  
  If argc is greater than 1, it is assumed that argv[1] contains the exit status
@@ -28,3 +33,7 @@
  \param argv arguments to be passed to the command
  */
 void cmd_exit(int argc, char **argv);
+
+/*!
+ \}
+ */
