@@ -129,7 +129,7 @@ void executeCommandsInQueue(queue_t *commandQueue)
 			}
 			previousCommand = currentCommand;
 		}
-		free(currentCommand);
+		commandFree(currentCommand);
 		currentCommand = NULL;
 		if(wasGlobUsed) {
 			globfree(&globBuf);
