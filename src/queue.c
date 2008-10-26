@@ -91,7 +91,9 @@ void queueFree(queue_t *queue)
 			if(freeFunction != NULL && data != NULL) {
 				freeFunction(data);
 			}
-			freeFunction = queue->head->freeFunction;
+			if(queue->head != NULL) {
+				freeFunction = queue->head->freeFunction;
+			}
 		}
 	}
 	free(queue);
