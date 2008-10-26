@@ -37,6 +37,17 @@ void cmd_prompt(int argc, char **argv)
 		free(g_prompt);
 		g_prompt = NULL;
 	}
+
+	/* If we don't have any arguments, just set an empty string */
+	if(argc == 1) {
+		g_prompt = malloc(1);
+		if(promptPtr == NULL) {
+			return;
+		}
+		*g_prompt = '\0';
+		return;
+	}
+
 	newSize = 0;
 	/* Determine the size of the prompt */
 	for(argi = 1; argi < argc; argi++) {
@@ -55,9 +66,12 @@ void cmd_prompt(int argc, char **argv)
 	/* Copy the prompt */
 	for(argi = 1; argi < argc; argi++) {
 		str = argv[argi];
-		strcat(promptPtr, str);
+		strcat(g_prompt, str);
 		if(argi < (argc - 1)) {
-			promptPtr[strlen(promptPtr)] = ' ';
+			promptPtr = g_prompt + strlen(g_prompt);
+			*promptPtr = ' ';
+			promptPtr++;
+			*promptPtr = '\0';
 		}
 	}
 }
