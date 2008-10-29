@@ -33,15 +33,6 @@
 /*! \brief Prototype for the function callback used to free queue node data */
 typedef void (*queueNodeFreeFunction)(void *);
 
-typedef struct __queue_node_t {
-	/*! \brief The data stored in the node */
-	void *data;
-	/*! \brief Next node in the queue */
-	struct __queue_node_t *next;
-	/*! \brief Callback used for freeing \a data */
-	queueNodeFreeFunction freeFunction;
-} _queue_node_t;
-
 /*!
  \brief FIFO queue structure
  */

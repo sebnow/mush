@@ -24,6 +24,16 @@
 #include <assert.h>
 #include "testing_util.h"
 
+/*! \brief Node of a queue, storing the data and a link to the next node */
+struct __queue_node_t {
+	/*! \brief The data stored in the node */
+	void *data;
+	/*! \brief Next node in the queue */
+	struct __queue_node_t *next;
+	/*! \brief Callback used for freeing \a data */
+	queueNodeFreeFunction freeFunction;
+};
+
 queue_t *queueNew()
 {
 	queue_t *queue;
@@ -38,7 +48,7 @@ queue_t *queueNew()
 
 void queueInsert(queue_t *queue, void *data, queueNodeFreeFunction func)
 {
-	_queue_node_t *node;
+	struct __queue_node_t *node;
 	assert(queue != NULL);
 	node = malloc(sizeof(*node));
 	if(node == NULL) {
@@ -61,7 +71,7 @@ void queueInsert(queue_t *queue, void *data, queueNodeFreeFunction func)
 int queueRemove(queue_t *queue, void **data)
 {
 	*data = NULL;
-	_queue_node_t *node;
+	struct __queue_node_t *node;
 	if(queue->head == NULL) {
 		return 0;
 	}
