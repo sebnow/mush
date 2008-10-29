@@ -39,7 +39,9 @@ static void run();
 static const char *getInput();
 
 /*! \brief Initial size of the input buffer */
-#define INITIAL_INPUT_BUFFER_SIZE 24
+#define INPUT_BUFFER_SIZE_INITIAL 24
+/*! \brief Multiplier by which the input buffer's size increases */
+#define INPUT_BUFFER_SIZE_MULTIPLIER 1.5f
 
 int main()
 {
@@ -70,10 +72,10 @@ void run()
 
 const char *getInput()
 {
-	char *buffer = malloc(INITIAL_INPUT_BUFFER_SIZE * sizeof(char));
+	char *buffer = malloc(INPUT_BUFFER_SIZE_INITIAL * sizeof(char));
 	int input;
 	size_t inputLength = 0;
-	size_t bufferSize = INITIAL_INPUT_BUFFER_SIZE;
+	size_t bufferSize = INPUT_BUFFER_SIZE_INITIAL;
 	if(buffer == NULL) {
 		return buffer;
 	}
@@ -82,7 +84,7 @@ const char *getInput()
 	while(input != EOF && (char)input != '\n') {
 		/* Increase the buffer size if necessary */
 		if(inputLength >= bufferSize) {
-			bufferSize = bufferSize * 1.5;
+			bufferSize = bufferSize * INPUT_BUFFER_SIZE_MULTIPLIER;
 			buffer = realloc(buffer, bufferSize * sizeof(*buffer));
 		}
 		buffer[inputLength] = (char)input;
