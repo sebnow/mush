@@ -71,8 +71,10 @@ void run()
 		}
 		input = (char *)getInput();
 		commandQueue = commandQueueFromInput(input);
-		executeCommandsInQueue(commandQueue);
-		queueFree(commandQueue);
+		if(commandQueue != NULL) {
+			executeCommandsInQueue(commandQueue);
+			queueFree(commandQueue);
+		}
 	} while(1);
 }
 
