@@ -20,6 +20,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+/*! \addtogroup unit_tests
+ \{
+ */
+
 /*!
  \brief Test initializing a command
  */
@@ -54,3 +58,5 @@ void testCommandSetConnectionMask(void **state);
  \brief Test checking of built-in functions
  */
 void testCommandIsBuiltin(void **state);
+
+/*! \} */

@@ -20,6 +20,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+/*! \addtogroup unit_tests
+ \{
+ */
+
 /*!
  \brief Test queue initialization
  */
@@ -39,3 +43,5 @@ void testQueueRemove(void **state);
  \brief Test counter in the queue
  */
 void testQueueCount(void **state);
+
+/*! \} */

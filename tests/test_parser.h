@@ -20,6 +20,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+/*! \addtogroup unit_tests
+ \{
+ */
+
 /*!
  \brief Test parsing of a single command
  */
@@ -39,3 +43,5 @@ void testParseTerminators(void **state);
  \brief Test proper allocation of redirection paths
  */
 void testParseRedirection(void **state);
+
+/*! \} */

@@ -20,6 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+/*! \defgroup unit_tests Unit Tests */
+
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>

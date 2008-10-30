@@ -20,6 +20,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+/*! \addtogroup unit_tests
+ \{
+ */
+
 /*!
  \brief Test setting the prompt
  */
@@ -29,3 +33,5 @@ void testPrompt(void **state);
  \brief Test changing directory
  */
 void testCd(void **state);
+
+/*! \} */
