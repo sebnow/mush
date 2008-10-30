@@ -11,7 +11,8 @@ OBJ = build/cd.o \
       build/command.o \
       build/exec.o \
       build/parser.o \
-      build/queue.o
+      build/queue.o \
+      build/jobs.o
 
 all: build/ $(APPNAME)
 

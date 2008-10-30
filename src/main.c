@@ -26,6 +26,7 @@
 #include "parser.h"
 #include "exec.h"
 #include "prompt.h"
+#include "jobs.h"
 #include "testing_util.h"
 
 /*!
@@ -126,7 +127,16 @@ static void signalHandler(int signal)
 static void claimChildren()
 {
 	pid_t pid;
+	job_t *job;
+	int jobNumber;
 	do {
 		pid = waitpid(0, NULL, WNOHANG);
+		if(pid > 0) {
+			jobNumber = jobWithPid(pid, &job);
+			if(jobNumber != -1) {
+				printf("[%d]  + done\t%s\n", jobNumber, job->command->path);
+				jobRemove(job);
+			}
+		}
 	} while(pid > 0);
 }

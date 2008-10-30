@@ -28,6 +28,7 @@
 #include <assert.h>
 #include "command.h"
 #include "builtin.h"
+#include "jobs.h"
 #include "testing_util.h"
 
 static void _executeBuiltinCommand(command_t *command)
@@ -81,6 +82,7 @@ void executeCommandsInQueue(queue_t *commandQueue)
 	glob_t *globBuf;
 	int index;
 	int wasGlobUsed = 0;
+	queue_t *jobs = queueNew();
 
 	/* Check if we have something to execute */
 	if(commandQueue == NULL) {
@@ -134,6 +136,9 @@ void executeCommandsInQueue(queue_t *commandQueue)
 			} else {
 				if(currentCommand->connectionMask != kCommandConnectionBackground) {
 					waitpid(pid, &waitStatus, 0);
+				} else {
+					jobAddWithCommandAndPid(currentCommand, pid);
+					printf("[%d] %d\n", jobsCount(), pid);
 				}
 			}
 			if(previousCommand != NULL) {
