@@ -303,7 +303,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 					if(isspace(*inputPtr)) {
 						inputPtr++;
 					}	else if(*inputPtr == '\0' || _isTerminator(*inputPtr)) {
-						fprintf(stderr, "mush: parse error near '%c'\n", *inputPtr);
+						fprintf(stderr, "mush: parse error near '%c%c'\n", *(inputPtr - 1), *inputPtr);
 						queueFree(commandQueue);
 						queueFree(tokens);
 						return NULL;
