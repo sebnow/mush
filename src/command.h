@@ -20,6 +20,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#ifndef COMMAND_H
+#define COMMAND_H
+
 /*!
  \addtogroup command
  \{
@@ -140,3 +143,5 @@ int commandIsBuiltIn(command_t *command);
 /*!
  \}
  */
+
+#endif /* COMMAND_H */
