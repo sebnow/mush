@@ -51,6 +51,24 @@ static void _executeBuiltinCommand(command_t *command)
 	builtinFunc = NULL;
 }
 
+static glob_t *_globCommand(command_t *command)
+{
+	glob_t *globBuf;
+	int index;
+	globBuf = malloc(sizeof(*globBuf));
+	if(command->argc > 0) {
+		globBuf->gl_offs = 0;
+		glob(command->argv[0], GLOB_NOCHECK, NULL, globBuf);
+		for(index = 1; index < command->argc; index++) {
+			glob(command->argv[index], GLOB_APPEND|GLOB_NOCHECK, NULL, globBuf);
+		}
+		command->path = globBuf->gl_pathv[0];
+		command->argv = globBuf->gl_pathv;
+		command->argc = globBuf->gl_pathc;
+	}
+	return globBuf;
+}
+
 void executeCommandsInQueue(queue_t *commandQueue)
 {
 	command_t *currentCommand = NULL;
@@ -60,7 +78,7 @@ void executeCommandsInQueue(queue_t *commandQueue)
 	int execStatus;
 	int pipeStatus;
 	int waitStatus;
-	glob_t globBuf;
+	glob_t *globBuf;
 	int index;
 	int wasGlobUsed = 0;
 
@@ -81,6 +99,8 @@ void executeCommandsInQueue(queue_t *commandQueue)
 					fprintf(stderr, "mush: unable to create pipe\n");
 				}
 			}
+			globBuf = _globCommand(currentCommand);
+			wasGlobUsed = globBuf != NULL;
 			pid = fork();
 			/* Child */
 			if(pid == 0) {
@@ -102,18 +122,9 @@ void executeCommandsInQueue(queue_t *commandQueue)
 					dup2(pipeDescriptors[0], fileno(stdin));
 					close(pipeDescriptors[1]);
 				}
-				/* Expand globs */
-				if(currentCommand->argc > 1) {
-					globBuf.gl_offs = 1;
-					glob(currentCommand->argv[1], GLOB_DOOFFS|GLOB_NOCHECK, NULL, &globBuf);
-					for(index = 2; index < currentCommand->argc; index++) {
-						glob(currentCommand->argv[index], GLOB_DOOFFS|GLOB_APPEND|GLOB_NOCHECK, NULL, &globBuf);
-					}
-					globBuf.gl_pathv[0] = currentCommand->path;
-					wasGlobUsed = 1;
-					execStatus = execvp(currentCommand->path, &globBuf.gl_pathv[0]);
+				if(wasGlobUsed) {
+					execStatus = execvp(currentCommand->path, &globBuf->gl_pathv[0]);
 				} else {
-					wasGlobUsed = 0;
 					execStatus = execvp(currentCommand->path, currentCommand->argv);
 				}
 				if(execStatus != 0) {
@@ -133,7 +144,7 @@ void executeCommandsInQueue(queue_t *commandQueue)
 		commandFree(currentCommand);
 		currentCommand = NULL;
 		if(wasGlobUsed) {
-			globfree(&globBuf);
+			globfree(globBuf);
 		}
 	}
 }
