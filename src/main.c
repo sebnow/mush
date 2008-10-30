@@ -40,7 +40,7 @@ static void run();
 static const char *getInput();
 
 static void signalHandler(int signal);
-static void setupSignalHandler();
+static void setupSignalHandlers();
 static void claimChildren();
 
 /*! \brief Initial size of the input buffer */
@@ -52,7 +52,7 @@ int main()
 {
 	char *prompt_argv[2] = {"prompt", "% "};
 	cmd_prompt(2, prompt_argv);
-	setupSignalHandler();
+	setupSignalHandlers();
 	run();
 	return 0;
 }
@@ -101,7 +101,7 @@ const char *getInput()
 	return buffer;
 }
 
-static void setupSignalHandler()
+static void setupSignalHandlers()
 {
 	struct sigaction act;
 	act.sa_flags = 0;
@@ -112,12 +112,31 @@ static void setupSignalHandler()
 		fprintf(stderr, "mush: unable to setup signal handler\n");
 		exit(1);
 	}
+	sigaction(SIGBUS, &act, NULL);
+	sigaction(SIGSEGV, &act, NULL);
+	sigaction(SIGILL, &act, NULL);
 }
 
 static void signalHandler(int signal)
 {
-	if(signal == SIGCHLD) {
-		claimChildren();
+	switch(signal) {
+		case SIGCHLD:
+			claimChildren();
+			break;
+		case SIGINT:
+			exit(EXIT_SUCCESS);
+			break;
+		/* Pretend that a crash is a limitation of the "demo" */
+		case SIGSEGV:
+		case SIGBUS:
+		case SIGILL:
+			printf("Thank you for using the demo version of Mush. The"
+			       " full version will be available soon.\n");
+			exit(EXIT_FAILURE);
+			break;
+		default:
+			printf("Got signal %d\n", signal);
+			break;
 	}
 }
 
