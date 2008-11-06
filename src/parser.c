@@ -30,6 +30,7 @@
 #include "testing_util.h"
 #include "command.h"
 #include "queue.h"
+#include "mush_error.h"
 
 enum {
 	/*! No redirection */
@@ -183,6 +184,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 	queue_t *tokens = queueNew();
 	command_t *command = NULL;
 	char *inputPtr = inputLine;
+	char *errorDescription = NULL;
 	
 	int currentState = kMachineStateInitial;
 
@@ -249,7 +251,11 @@ queue_t *commandQueueFromInput(char *inputLine) {
 			case kMachineStateParsingCommandTerminator:
 				if(command == NULL) {
 					if(_isTerminator(*(inputPtr - 1))) {
-						fprintf(stderr, "mush: parse error near '%c%c'\n", *(inputPtr - 1), *inputPtr);
+						asprintf(&errorDescription, "parse error near '%c%c'", *(inputPtr - 1), *inputPtr);
+						setMushError(kMushParseError);
+						setMushErrorDescription(errorDescription);
+						free(errorDescription);
+						errorDescription = NULL;
 						queueFree(commandQueue);
 						queueFree(tokens);
 						return NULL;
@@ -303,7 +309,11 @@ queue_t *commandQueueFromInput(char *inputLine) {
 					if(isspace(*inputPtr)) {
 						inputPtr++;
 					}	else if(*inputPtr == '\0' || _isTerminator(*inputPtr)) {
-						fprintf(stderr, "mush: parse error near '%c%c'\n", *(inputPtr - 1), *inputPtr);
+						asprintf(&errorDescription, "parse error near '%c%c'", *(inputPtr - 1), *inputPtr);
+						setMushError(kMushParseError);
+						setMushErrorDescription(errorDescription);
+						free(errorDescription);
+						errorDescription = NULL;
 						queueFree(commandQueue);
 						queueFree(tokens);
 						return NULL;

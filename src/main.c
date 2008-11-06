@@ -27,6 +27,7 @@
 #include "exec.h"
 #include "prompt.h"
 #include "testing_util.h"
+#include "mush_error.h"
 
 /*!
  \brief Main program loop
@@ -62,6 +63,7 @@ void run()
 	char *input = NULL;
 	char *prompt = NULL;
 	queue_t *commandQueue = NULL;
+	MushErrorCode errorCode;
 	do {
 		prompt = getPrompt();
 		printf("%s", prompt);
@@ -71,8 +73,13 @@ void run()
 		}
 		input = (char *)getInput();
 		commandQueue = commandQueueFromInput(input);
-		if(commandQueue != NULL) {
-			executeCommandsInQueue(commandQueue);
+		if(commandQueue == NULL && mushError() != kMushNoError) {
+			fprintf(stderr, "mush: %s\n", mushErrorDescription());
+		} else {
+			errorCode = executeCommandsInQueue(commandQueue);
+			if(errorCode != 0 && mushError() != kMushNoError) {
+				fprintf(stderr, "mush: %s\n", mushErrorDescription());
+			}
 			queueFree(commandQueue);
 		}
 	} while(1);

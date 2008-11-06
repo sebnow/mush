@@ -29,6 +29,7 @@
 #include "command.h"
 #include "builtin.h"
 #include "testing_util.h"
+#include "mush_error.h"
 
 static void _executeBuiltinCommand(command_t *command)
 {
@@ -69,82 +70,98 @@ static glob_t *_globCommand(command_t *command)
 	return globBuf;
 }
 
-void executeCommandsInQueue(queue_t *commandQueue)
+int executeCommandsInQueue(queue_t *commandQueue)
 {
 	command_t *currentCommand = NULL;
 	command_t *previousCommand = NULL;
 	pid_t pid;
 	int pipeDescriptors[2];
-	int execStatus;
+	int execStatus = 0;
 	int pipeStatus;
 	int waitStatus;
 	glob_t *globBuf;
-	int index;
 	int wasGlobUsed = 0;
+	char *errorDescription = NULL;
 
 	/* Check if we have something to execute */
 	if(commandQueue == NULL) {
-		return;
+		return kMushNoError;
 	}
 
 	while(queueRemove(commandQueue, (void *)&currentCommand)) {
 		assert(currentCommand != NULL);
-		if(commandIsBuiltIn(currentCommand)) {
+		/* Create the pipe before forking */
+		if(currentCommand->connectionMask == kCommandConnectionPipe) {
+			pipeStatus = pipe(pipeDescriptors);
+			if(pipeStatus != 0) {
+				setMushError(kMushGenericError);
+				setMushErrorDescription("unable to create pipe");
+				free(errorDescription);
+				errorDescription = NULL;
+				return mushError();
+			}
+		}
+		globBuf = _globCommand(currentCommand);
+		wasGlobUsed = globBuf != NULL;
+		/* Execute builtin command, pwd is a special case as it has output */
+		if(commandIsBuiltIn(currentCommand)
+		&& strncmp(currentCommand->path, "pwd", 3) != 0) {
 			_executeBuiltinCommand(currentCommand);
-		} else {
-			/* Create the pipe before forking */
+			continue;
+		}
+		pid = fork();
+		/* Child */
+		if(pid == 0) {
+			/* Redirect stdout to file if file is specified */
+			if(currentCommand->redirectToPath != NULL) {
+				freopen(currentCommand->redirectToPath, "w", stdout);
+			}
+			/* Redirect stdin to file if file is specified */
+			if(currentCommand->redirectFromPath != NULL) {
+				freopen(currentCommand->redirectFromPath, "r", stdin);
+			}
+			/* Send stdout to the write end of the pipe */
 			if(currentCommand->connectionMask == kCommandConnectionPipe) {
-				pipeStatus = pipe(pipeDescriptors);
-				if(pipeStatus != 0) {
-					fprintf(stderr, "mush: unable to create pipe\n");
-				}
+				dup2(pipeDescriptors[1], fileno(stdout));
+				close(pipeDescriptors[0]);
 			}
-			globBuf = _globCommand(currentCommand);
-			wasGlobUsed = globBuf != NULL;
-			pid = fork();
-			/* Child */
-			if(pid == 0) {
-				/* Redirect stdout to file if file is specified */
-				if(currentCommand->redirectToPath != NULL) {
-					freopen(currentCommand->redirectToPath, "w", stdout);
-				}
-				/* Redirect stdin to file if file is specified */
-				if(currentCommand->redirectFromPath != NULL) {
-					freopen(currentCommand->redirectFromPath, "r", stdin);
-				}
-				/* Send stdout to the write end of the pipe */
-				if(currentCommand->connectionMask == kCommandConnectionPipe) {
-					dup2(pipeDescriptors[1], fileno(stdout));
-					close(pipeDescriptors[0]);
-				}
-				/* Redirect the read end into stdin */
-				if(previousCommand != NULL && previousCommand->connectionMask == kCommandConnectionPipe) {
-					dup2(pipeDescriptors[0], fileno(stdin));
-					close(pipeDescriptors[1]);
-				}
-				if(wasGlobUsed) {
-					execStatus = execvp(currentCommand->path, &globBuf->gl_pathv[0]);
-				} else {
-					execStatus = execvp(currentCommand->path, currentCommand->argv);
-				}
-				if(execStatus != 0) {
-					fprintf(stderr, "mush: could not execute: %s\n", currentCommand->path);
-					exit(1);
-				}
+			/* Redirect the read end into stdin */
+			if(previousCommand != NULL && previousCommand->connectionMask == kCommandConnectionPipe) {
+				dup2(pipeDescriptors[0], fileno(stdin));
+				close(pipeDescriptors[1]);
+			}
+			if(strncmp(currentCommand->path, "pwd", 3) == 0) {
+				_executeBuiltinCommand(currentCommand);
+				exit(EXIT_SUCCESS);
+			} else if(wasGlobUsed) {
+				execStatus = execvp(currentCommand->path, &globBuf->gl_pathv[0]);
 			} else {
-				if(currentCommand->connectionMask != kCommandConnectionBackground) {
-					waitpid(pid, &waitStatus, 0);
-				}
+				execStatus = execvp(currentCommand->path, currentCommand->argv);
 			}
-			if(previousCommand != NULL) {
-				commandFree(previousCommand);
+			if(execStatus != 0) {
+				fprintf(stderr, "could not execute: %s\n", currentCommand->path);
+				exit(kMushExecutionError);
 			}
-			previousCommand = currentCommand;
+		} else {
+			if(currentCommand->connectionMask != kCommandConnectionBackground) {
+				waitpid(pid, &waitStatus, 0);
+			}
 		}
-		commandFree(currentCommand);
+		if(previousCommand != NULL) {
+			commandFree(previousCommand);
+		}
+		previousCommand = currentCommand;
 		currentCommand = NULL;
-		if(wasGlobUsed) {
-			globfree(globBuf);
-		}
 	}
+	/* FIXME: Dieing children can interrupt the loop, causing a NULL pointer to be
+	   freed. This is a temporary solution. */
+	if(previousCommand != NULL) {
+		commandFree(previousCommand);
+		previousCommand = NULL;
+	}
+	if(wasGlobUsed) {
+		globfree(globBuf);
+	}
+
+	return 0;
 }

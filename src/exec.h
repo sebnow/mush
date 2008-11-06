@@ -32,4 +32,4 @@
  
  \param commandQueue queue of \c command_t objects
  */
-void executeCommandsInQueue(queue_t *commandQueue);
+int executeCommandsInQueue(queue_t *commandQueue);
