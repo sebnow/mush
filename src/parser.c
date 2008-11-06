@@ -185,6 +185,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 	command_t *command = NULL;
 	char *inputPtr = inputLine;
 	char *errorDescription = NULL;
+	char lastTerminator = 0;
 	
 	int currentState = kMachineStateInitial;
 
@@ -214,7 +215,21 @@ queue_t *commandQueueFromInput(char *inputLine) {
 			case kMachineStateInitial:
 				/* Set everything up to be ready for parsing the next command */
 				assert(command == NULL);
+				/* Ignore whitespace */
+				if(isspace(*inputPtr)) {
+					continue;
+				}
 				if(*inputPtr == '\0') {
+					if(lastTerminator == '|') {
+						asprintf(&errorDescription, "parse error near '%c'", lastTerminator);
+						setMushError(kMushParseError);
+						setMushErrorDescription(errorDescription);
+						free(errorDescription);
+						errorDescription = NULL;
+						queueFree(commandQueue);
+						queueFree(tokens);
+						return NULL;
+					}
 					currentState = kMachineStateTerminal;
 				} else {
 					command = commandNew();
@@ -223,6 +238,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 					}
 					currentState = kMachineStateEnteringPath;
 				}
+				lastTerminator = 0;
 				break;
 			case kMachineStateEnteringPath:
 				/* Set up everything to parse the path */
@@ -262,6 +278,7 @@ queue_t *commandQueueFromInput(char *inputLine) {
 					}
 					assert(0);
 				}
+				lastTerminator = *inputPtr;
 				_setConnectionMaskBasedOnCharacter(command, *inputPtr);
 				_addTokensToCommand(tokens, command);
 				queueInsert(commandQueue, command, (queueNodeFreeFunction)commandFree);
